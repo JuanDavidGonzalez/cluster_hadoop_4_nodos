@@ -27,7 +27,7 @@ Se debe instalar Java 8 en todos los nodos.
     $ sudo apt-get install oracle-java8-installer
     
 Verificar Instalación Java:
-  
+	
     $ java -version
       
 ### Configuración Conexión entre los nodos  
@@ -35,7 +35,7 @@ El nodo maestro utilizará una conexión ssh para conectarse a los otros nodos m
 
 Se debe iniciar sesión en el nodo master con el usuario hadoop y generar una clave ssh:
 
-  $ ssh-keygen -b 4096
+	$ ssh-keygen -b 4096
         
 Para copiar la clave a los otros nodos, jecutar los siguientes comandos e ingresar la  contraseña del usuario hadoop cuando se solicite. Si pregunta si desea agregar o no la clave a los hosts conocidos (known hosts), se debe indicar que si (yes):
 
@@ -50,23 +50,23 @@ Para copiar la clave a los otros nodos, jecutar los siguientes comandos e ingres
 Para poder hacer uso del Almacenamiento en RAMDISK se debe crear primero dicha unidad, para crea un RAMDISK realizamos los siguientes pasos:
 
 - Crear punto de montaje.
-  
-      $ sudo mkdir -p /mnt/RAM
+	
+  	  $ sudo mkdir -p /mnt/RAM
 
 - Montar RAMDisk indicando el tamaño de memoria que se desea asignar, en este caso se  asignan 30GB.
 
-    $ sudo mount -t tmpfs -o size=30g tmpfs /mnt/RAM/  
+		$ sudo mount -t tmpfs -o size=30g tmpfs /mnt/RAM/  
 
   Ejecutar el comando **df -h**, para verificar el RAMDISK montado.  
 
 - Posteriormente se debe hacer que el propietario del directorio donde se monto el RAMDisk, sea el usuario hadoop, por lo que se deben cambiar los permisos asignados.
 
-    $ sudo chown -R hadoop:hadoop /mnt/RAM/     
-    $ chmod 777 /mnt/RAM/
+		$ sudo chown -R hadoop:hadoop /mnt/RAM/     
+		$ chmod 777 /mnt/RAM/
        
   Anexar la siguiente línea al archivo **/etc/fstab** para que el RAMDISK se monte automáticamente cada vez que se reinicien las máquinas.  
   
-      tmpfs /mnt/dn-tmpfs/ tmpfs nodev,uid=hadoop,gid=hadoop,noexec,nodiratime,size=30G 0 0/
+  		tmpfs /mnt/dn-tmpfs/ tmpfs nodev,uid=hadoop,gid=hadoop,noexec,nodiratime,size=30G 0 0/
   
 ### Montar Partición Disco
 
@@ -74,16 +74,16 @@ En este caso el disco SSD en el disco principal y se desea montar un disco HDD.
 
 - Listar discos disponibles
 
-    $ sudo lsblk
+		$ sudo lsblk
     
     Para verificar si el disco es SSD o HDD ejecutar:  
     
-      $ sudo cat /sys/block/sda/queue/rotational
+    	$ sudo cat /sys/block/sda/queue/rotational
     En este caso se esta verificando el disco sda, reemplazar sda, por el nombre del disco que se desea verificar.  
     
     Si la salida del comando es **1**, es un **HDD**, si la salida es **0**, es un **SSD**.
     
-  En este caso se desea montar el disco sda, el disco que se desea montar debe tener por     lo menos una particion. Para crear una partición ejecutar:
+	En este caso se desea montar el disco sda, el disco que se desea montar debe tener por     lo menos una particion. Para crear una partición ejecutar:
 
       $ sudo fdisk /dev/sda
       >> opcion: m  (Ver menu)
@@ -93,15 +93,15 @@ En este caso el disco SSD en el disco principal y se desea montar un disco HDD.
    
   Si se ejecuta el comando **lsblk** nuevamente se debe observar el disco con su     partición, en este caso sda1. para dar formato a la particion creada ejecutar el siguiente comando:  
 
-    $ sudo mkfs.ext4 /dev/sda1  
+	  $ sudo mkfs.ext4 /dev/sda1  
 
 
 - Crear punto de montaje
-  
-      $ sudo mkdir -p /mnt/HDD
+	
+  	  $ sudo mkdir -p /mnt/HDD
 - Montar partición
 
-    $ sudo mount -t /dev/sda1 /mnt/HDD
+	  $ sudo mount -t /dev/sda1 /mnt/HDD
     
   Ejecutar el comando **df -h** para verificar la partición montado.
   
@@ -118,7 +118,7 @@ En este caso el disco SSD en el disco principal y se desea montar un disco HDD.
     export HADOOP_COMMON_LIB_NATIVE_DIR=/home/hadoop/hadoop/lib/native
     export PATH=$PATH:/home/hadoop/hadoop/sbin:/home/hadoop/hadoop/bin
     export HADOOP_INSTALL=/home/hadoop/hadoop
-  export LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native/:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native/:$LD_LIBRARY_PATH
   
 ## Descargar Hadoop y reemplazar archivos
 
@@ -138,26 +138,26 @@ Estos archivos son 6:
 
 Formatera el namenode:
 
-  $ hdfs namenode -format
+	$ hdfs namenode -format
 Iniciar el HDFS  
 
-  $ start-dfs.sh
+	$ start-dfs.sh
     
 Crear directorio personal  en HDFS
 
-  $ hdfs dfs -mkdir -p /user/hadoop
+	$ hdfs dfs -mkdir -p /user/hadoop
 
 Crear directorios en HDFS para almacenamiento Heterogeneo
 
-  $ hdfs dfs -mkdir RAM  
+	$ hdfs dfs -mkdir RAM  
     $ hdfs dfs -mkdir HOT  
     $ hdfs dfs -mkdir HDD
     
 Establecer politicas de Alamacenamiento para cada uno de los directorios creados:
 
 
-  $ hdfs storagepolicies -setStoragePolicy -path RAM -policy LAZY_PERSIST
+	$ hdfs storagepolicies -setStoragePolicy -path RAM -policy LAZY_PERSIST
     $ hdfs storagepolicies -setStoragePolicy -path SSD -policy ALL_SSD
     $ hdfs storagepolicies -setStoragePolicy -path HDD -policy HOT
     
- De esta forma todo lo que se almacene en el directorio RAM del HDFS, será ubicado en el RAMDISK, lo que se almacene en el directorio SSD, se ubicará en el disco SSD y lo que se almanene en el directorio HDD, se ubicará en el disco HDD.
+ De esta forma todo lo que se almacene en el directorio RAM del HDFS, sera ubicado en el RAMDISK, lo que se almacene en el directorio SSD, se ubicará en el disco SSD y lo que se almanene en el directorio HDD, se ubicara en el disco HDD.
